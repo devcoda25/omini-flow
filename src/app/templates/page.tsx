@@ -149,7 +149,7 @@ export default function TemplatesPage() {
                       required
                     />
                      <p className="text-xs text-muted-foreground">
-                        Use double curly braces for variables, e.g., `{{1}}`.
+                        {'Use double curly braces for variables, e.g., `{{1}}`.'}
                     </p>
                   </div>
                    <div className="space-y-2">

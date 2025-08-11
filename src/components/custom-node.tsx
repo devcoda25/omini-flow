@@ -1,10 +1,11 @@
+
 'use client';
 
 import React from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { nodeCategories } from '@/lib/nodes';
 import { cn } from '@/lib/utils';
-import { MessageSquare, MoreHorizontal, Trash2, Wand2, Expand } from 'lucide-react';
+import { MessageSquare, MoreHorizontal, Trash2, Wand2, Expand, Image, Video, FileText, File } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,21 @@ const nodeHeaderColorClasses = {
     'gray': 'bg-gray-500',
 };
 
+const MessageTypeButton = ({ icon: Icon, label, isActive, onClick }: { icon: React.ElementType, label: string, isActive: boolean, onClick: () => void }) => (
+    <Button
+        variant={isActive ? "secondary" : "ghost"}
+        size="sm"
+        className={cn("flex-1 justify-start text-left gap-2 px-2", isActive && "bg-primary/10 text-primary font-semibold")}
+        onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+        }}
+    >
+        <Icon className="h-4 w-4" />
+        <span>{label}</span>
+    </Button>
+)
+
 const CustomNode: React.FC<NodeProps> = ({ id, data, selected }) => {
   const { deleteNode, openNodeModal, updateNodeData } = useFlowStore();
   const allNodes = nodeCategories.flatMap(category => category.nodes);
@@ -45,8 +61,32 @@ const CustomNode: React.FC<NodeProps> = ({ id, data, selected }) => {
       openNodeModal(id);
     }
   };
+
+  const handleMessageTypeChange = (messageType: string) => {
+    updateNodeData(id, { ...data, messageType });
+  };
   
   const isConditionNode = data.type === 'condition';
+  const isMessageNode = data.type === 'message';
+
+  const getDescription = () => {
+    if (isMessageNode) {
+        const messageType = data.messageType || 'text';
+        switch (messageType) {
+            case 'text':
+                return data.message ? `"${data.message}"` : 'Click to edit text message.';
+            case 'image':
+                return data.caption || 'Click to add an image.';
+            case 'video':
+                return data.caption || 'Click to add a video.';
+            case 'document':
+                 return data.caption || 'Click to add a document.';
+            default:
+                return 'Select a message type.';
+        }
+    }
+    return data.description || 'Node configuration goes here.';
+  }
 
   return (
     <div 
@@ -85,9 +125,41 @@ const CustomNode: React.FC<NodeProps> = ({ id, data, selected }) => {
             )}
           </div>
       </div>
-      <div className='p-3 text-sm text-gray-600 min-h-[40px]'>
-         {data.description || 'Node configuration goes here.'}
+      <div className='p-3 text-sm text-gray-600 min-h-[40px] truncate'>
+         {getDescription()}
       </div>
+
+      {isMessageNode && (
+        <div className="px-3 pb-3">
+            <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-md">
+                <MessageTypeButton 
+                    icon={MessageSquare}
+                    label="Text"
+                    isActive={!data.messageType || data.messageType === 'text'}
+                    onClick={() => handleMessageTypeChange('text')}
+                />
+                <MessageTypeButton 
+                    icon={Image}
+                    label="Image"
+                    isActive={data.messageType === 'image'}
+                    onClick={() => handleMessageTypeChange('image')}
+                />
+                <MessageTypeButton 
+                    icon={Video}
+                    label="Video"
+                    isActive={data.messageType === 'video'}
+                    onClick={() => handleMessageTypeChange('video')}
+                />
+                <MessageTypeButton 
+                    icon={File}
+                    label="Document"
+                    isActive={data.messageType === 'document'}
+                    onClick={() => handleMessageTypeChange('document')}
+                />
+            </div>
+        </div>
+      )}
+
 
       {data.type !== 'trigger' && (
           <Handle type="target" position={Position.Left} className="!w-3 !h-3 !bg-green-600" />

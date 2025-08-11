@@ -92,7 +92,7 @@ const CustomNode: React.FC<NodeProps> = ({ id, data, selected }) => {
     <div 
       className={cn(
         "w-72 rounded-lg bg-white shadow-md border-2 border-transparent transition-all duration-200 group hover:cursor-grab", 
-        selected && "border-green-600 shadow-lg ring-2 ring-offset-2 ring-green-600"
+        selected && "shadow-lg ring-2 ring-offset-2 ring-green-600"
       )}
       onDoubleClick={handleDoubleClick}
     >
@@ -130,7 +130,7 @@ const CustomNode: React.FC<NodeProps> = ({ id, data, selected }) => {
       </div>
 
       {isMessageNode && (
-        <div className="px-3 pb-3">
+        <div className="p-3">
             <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-md">
                 <MessageTypeButton 
                     icon={MessageSquare}

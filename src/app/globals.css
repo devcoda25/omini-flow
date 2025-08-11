@@ -87,7 +87,7 @@
 }
 
 .react-flow__node.selected {
-    @apply border-primary shadow-lg;
+    @apply shadow-lg;
 }
 
 .react-flow__handle {

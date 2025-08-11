@@ -5,7 +5,7 @@ import React from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { nodeCategories } from '@/lib/nodes';
 import { cn } from '@/lib/utils';
-import { MessageSquare, MoreHorizontal, Trash2, Wand2, Expand, Image, Video, FileText, File } from 'lucide-react';
+import { MessageSquare, MoreHorizontal, Trash2, Expand, Image, Video, FileText, File } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,7 +57,7 @@ const CustomNode: React.FC<NodeProps> = ({ id, data, selected }) => {
   };
 
   const handleDoubleClick = () => {
-    if (data.type !== 'trigger') {
+    if (data.type !== 'trigger' && data.type !== 'end_flow') {
       openNodeModal(id);
     }
   };
@@ -68,6 +68,7 @@ const CustomNode: React.FC<NodeProps> = ({ id, data, selected }) => {
   
   const isConditionNode = data.type === 'condition';
   const isMessageNode = data.type === 'message';
+  const isControlNode = data.type === 'trigger' || data.type === 'end_flow';
 
   const getDescription = () => {
     if (isMessageNode) {
@@ -86,6 +87,25 @@ const CustomNode: React.FC<NodeProps> = ({ id, data, selected }) => {
         }
     }
     return data.description || 'Node configuration goes here.';
+  }
+
+  if (isControlNode) {
+    return (
+       <div 
+        className={cn(
+            "w-72 rounded-lg transition-all duration-200 group flex items-center justify-center p-4 gap-4",
+            selected && "ring-2 ring-offset-2 ring-green-600"
+        )}
+       >
+        <Icon className={cn("h-8 w-8", data.type === 'trigger' ? 'text-green-600' : 'text-red-600')} />
+        <h3 className="text-lg font-semibold text-gray-700">{data.label}</h3>
+         {data.type === 'trigger' ? (
+             <Handle type="source" position={Position.Right} className="!w-3 !h-3 !bg-green-600" />
+         ) : (
+            <Handle type="target" position={Position.Left} className="!w-3 !h-3 !bg-red-600" />
+         )}
+       </div>
+    )
   }
 
   return (
@@ -130,8 +150,8 @@ const CustomNode: React.FC<NodeProps> = ({ id, data, selected }) => {
       </div>
 
       {isMessageNode && (
-        <div className="p-3">
-            <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-md">
+        <div className="p-2">
+            <div className="grid grid-cols-2 gap-1 p-1 bg-gray-100 rounded-md">
                 <MessageTypeButton 
                     icon={MessageSquare}
                     label="Text"

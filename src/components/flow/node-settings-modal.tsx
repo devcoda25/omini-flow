@@ -204,7 +204,7 @@ const ConditionSettings = ({ node, onDataChange }: { node: Node, onDataChange: (
 };
 
 // Generic helper for media nodes
-const MediaSettings = ({ node, onDataChange, mediaType }: { node: Node, onDataChange: (data: any) => void, mediaType: 'Image' | 'Video' | 'Audio' | 'Document' }) => {
+const MediaSettings = ({ node, onDataChange, mediaType }: { node: Node, onDataChange: (data: any) => void, mediaType: 'image' | 'video' | 'audio' | 'document' }) => {
     const [caption, setCaption] = useState(node.data.caption || '');
     const [url, setUrl] = useState(node.data.url || '');
     const [fileDataUri, setFileDataUri] = useState<string | null>(node.data.fileDataUri || null);
@@ -231,6 +231,11 @@ const MediaSettings = ({ node, onDataChange, mediaType }: { node: Node, onDataCh
         }
     };
 
+    const handleRemoveImage = () => {
+        setFileDataUri(null);
+        setUrl('');
+    }
+
 
     useEffect(() => {
         onDataChange({ ...node.data, caption, url, fileDataUri });
@@ -243,7 +248,7 @@ const MediaSettings = ({ node, onDataChange, mediaType }: { node: Node, onDataCh
             const reader = new FileReader();
             reader.onloadend = () => {
                 const result = reader.result as string;
-                if (mediaType === 'Image') {
+                if (mediaType === 'image') {
                     setImageForCropping(result);
                     setIsCropping(true);
                 } else {
@@ -257,18 +262,20 @@ const MediaSettings = ({ node, onDataChange, mediaType }: { node: Node, onDataCh
 
     const getHelperText = () => {
         switch (mediaType) {
-            case 'Image':
+            case 'image':
                 return 'PNG, JPG, GIF up to 10MB';
-            case 'Video':
+            case 'video':
                 return 'MP4, 3GPP up to 16MB';
-             case 'Audio':
+             case 'audio':
                 return 'MP3, OGG, AMR up to 16MB';
-            case 'Document':
+            case 'document':
                 return 'PDF, DOCX, XLSX up to 100MB';
             default:
                 return 'File size limits apply';
         }
     }
+    
+    const mediaTypeTitle = mediaType.charAt(0).toUpperCase() + mediaType.slice(1);
 
     if (isCropping) {
         return (
@@ -310,7 +317,7 @@ const MediaSettings = ({ node, onDataChange, mediaType }: { node: Node, onDataCh
     return (
         <>
             <DialogHeader>
-                <DialogTitle>Send an {mediaType}</DialogTitle>
+                <DialogTitle>Send an {mediaTypeTitle}</DialogTitle>
                 <Separator className="my-4" />
             </DialogHeader>
             <Tabs defaultValue="upload" className="w-full">
@@ -339,7 +346,7 @@ const MediaSettings = ({ node, onDataChange, mediaType }: { node: Node, onDataCh
                 <TabsContent value="url">
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="media-url">{mediaType} URL</Label>
+                            <Label htmlFor="media-url">{mediaTypeTitle} URL</Label>
                             <Input
                                 id="media-url"
                                 value={url}
@@ -357,8 +364,8 @@ const MediaSettings = ({ node, onDataChange, mediaType }: { node: Node, onDataCh
             {fileDataUri && (
                  <div className="mt-4">
                     <Label>Preview</Label>
-                    {mediaType === 'Image' ? (
-                        <div className="mt-2">
+                    {mediaType === 'image' ? (
+                        <div className="mt-2 group relative">
                             <div className="rounded-md border relative w-48 h-48 bg-muted">
                                 <Image 
                                     src={fileDataUri} 
@@ -366,6 +373,11 @@ const MediaSettings = ({ node, onDataChange, mediaType }: { node: Node, onDataCh
                                     fill
                                     className="object-contain rounded-md"
                                 />
+                                 <div className="absolute top-1 right-1">
+                                    <Button variant="destructive" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleRemoveImage}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
                             <Button variant="outline" size="sm" className="mt-2" onClick={() => {
                                 setImageForCropping(fileDataUri);
@@ -380,12 +392,15 @@ const MediaSettings = ({ node, onDataChange, mediaType }: { node: Node, onDataCh
                              <FileIcon className="h-8 w-8 text-gray-500" />
                              <div className="truncate">
                                 <p className="text-sm font-medium truncate">
-                                    {caption || `${mediaType} file attached`}
+                                    {caption || `${mediaTypeTitle} file attached`}
                                 </p>
                                 <p className="text-xs text-gray-500">
                                     {url ? 'From URL' : 'Uploaded file'}
                                 </p>
                              </div>
+                             <Button variant="ghost" size="icon" className="ml-auto" onClick={handleRemoveImage}>
+                                <X className="h-4 w-4" />
+                            </Button>
                          </div>
                      )}
                 </div>
@@ -485,8 +500,8 @@ const WebhookSettings = ({ node, onDataChange }: { node: Node, onDataChange: (da
     const [url, setUrl] = useState(node.data.url || 'https://');
     const [headers, setHeaders] = useState(node.data.headers || '');
     const [body, setBody] = useState(node.data.body || '');
-    const [customizeHeaders, setCustomizeHeaders] = useState(node.data.customizeHeaders || false);
-    const [customizeBody, setCustomizeBody] = useState(node.data.customizeBody || false);
+    const [customizeHeaders, setCustomizeHeaders] = useState(!!node.data.headers);
+    const [customizeBody, setCustomizeBody] = useState(!!node.data.body);
     const [testResult, setTestResult] = useState<TestResult>(null);
 
     useEffect(() => {
@@ -494,10 +509,8 @@ const WebhookSettings = ({ node, onDataChange }: { node: Node, onDataChange: (da
             ...node.data,
             method,
             url,
-            headers,
-            body,
-            customizeHeaders,
-            customizeBody,
+            headers: customizeHeaders ? headers : '',
+            body: customizeBody ? body : '',
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [method, url, headers, body, customizeHeaders, customizeBody]);
@@ -847,7 +860,7 @@ export function NodeSettingsModal() {
     }
   }, [modalNodeId, nodes]);
 
-  const handleDataChange = (newData: any) => {
+  const handleDataChange = useCallback((newData: any) => {
     if (currentNode) {
       setCurrentNode(produce(currentNode, draft => {
         if (draft) {
@@ -855,7 +868,7 @@ export function NodeSettingsModal() {
         }
       }));
     }
-  };
+  }, [currentNode]);
 
   const handleSave = () => {
     if (currentNode) {
@@ -912,21 +925,29 @@ export function NodeSettingsModal() {
   const renderNodeSettings = () => {
     if (!currentNode) return null;
 
+    // Special handling for the combined 'message' node
+    if (currentNode.data.type === 'message') {
+        const messageType = currentNode.data.messageType || 'text';
+        switch (messageType) {
+            case 'text':
+                return <MessageSettings node={currentNode} onDataChange={handleDataChange} />;
+            case 'image':
+                return <MediaSettings node={currentNode} onDataChange={handleDataChange} mediaType="image" />;
+            case 'video':
+                return <MediaSettings node={currentNode} onDataChange={handleDataChange} mediaType="video" />;
+            case 'document':
+                return <MediaSettings node={currentNode} onDataChange={handleDataChange} mediaType="document" />;
+            default:
+                 return <MessageSettings node={currentNode} onDataChange={handleDataChange} />;
+        }
+    }
+
+
     switch (currentNode.data.type) {
-      case 'message':
-        return <MessageSettings node={currentNode} onDataChange={handleDataChange} />;
       case 'question':
         return <QuestionSettings node={currentNode} onDataChange={handleDataChange} />;
       case 'condition':
         return <ConditionSettings node={currentNode} onDataChange={handleDataChange} />;
-      case 'image':
-        return <MediaSettings node={currentNode} onDataChange={handleDataChange} mediaType="Image" />;
-      case 'video':
-        return <MediaSettings node={currentNode} onDataChange={handleDataChange} mediaType="Video" />;
-      case 'audio':
-        return <MediaSettings node={currentNode} onDataChange={handleDataChange} mediaType="Audio" />;
-      case 'document':
-        return <MediaSettings node={currentNode} onDataChange={handleDataChange} mediaType="Document" />;
       case 'time_delay':
         return <TimeDelaySettings node={currentNode} onDataChange={handleDataChange} />;
       case 'webhook':
@@ -983,7 +1004,7 @@ export function NodeSettingsModal() {
   }
 
   let dialogContentClassName = "sm:max-w-lg";
-  if (currentNode.data.type === 'image' && (currentNode as any).isCropping) {
+  if (currentNode.data.type === 'message' && (currentNode.data.messageType === 'image') && isCropping) {
     dialogContentClassName = "sm:max-w-2xl";
   }
 
@@ -1005,5 +1026,3 @@ export function NodeSettingsModal() {
     </Dialog>
   );
 }
-
-    

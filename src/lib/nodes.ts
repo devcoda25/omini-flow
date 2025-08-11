@@ -1,6 +1,6 @@
 
 import type { LucideIcon } from "lucide-react";
-import { MessageSquare, ChevronsRight, Briefcase, Clock, Bot, ArrowRight, Cog, Play, UserCheck, UserX, Tag, User, Users, Power, Send, FileText, HelpCircle, GitBranch, Share2, Image, Video, Music, File, PowerOff } from 'lucide-react';
+import { MessageSquare, ChevronsRight, Briefcase, Clock, Bot, ArrowRight, Cog, UserCheck, UserX, Tag, User, Users, Power, Send, FileText, HelpCircle, GitBranch, Share2, Image, Video, Music, File, Flag, FlagOff } from 'lucide-react';
 
 export type NodeType = 
   | 'trigger'
@@ -44,7 +44,7 @@ export const nodeCategories: NodeCategory[] = [
   {
     name: 'Operations',
     nodes: [
-      { type: 'trigger', label: 'Start Flow', description: 'Initial trigger for the flow.', icon: Play, color: 'green' },
+      { type: 'trigger', label: 'Start Flow', description: 'Initial trigger for the flow.', icon: Flag, color: 'green' },
       { type: 'message', label: 'Message', description: 'Send a message, image, video, or document.', icon: MessageSquare, color: 'purple' },
       { type: 'question', label: 'Question', description: 'Ask a question and save the answer.', icon: HelpCircle, color: 'purple' },
       { type: 'condition', label: 'If/Else Condition', description: 'Branch the flow based on a condition.', icon: GitBranch, color: 'purple' },
@@ -56,7 +56,7 @@ export const nodeCategories: NodeCategory[] = [
       { type: 'assign_user', label: 'Assign User', description: 'Assign the conversation to a specific user.', icon: User, color: 'purple' },
       { type: 'trigger_chatbot', label: 'Trigger Chatbot', description: 'Start another chatbot flow.', icon: Bot, color: 'purple' },
       { type: 'update_chat_status', label: 'Update Chat Status', description: 'Change the status of the chat.', icon: Power, color: 'red' },
-      { type: 'end_flow', label: 'End Flow', description: 'Marks the end of a flow path.', icon: PowerOff, color: 'red' },
+      { type: 'end_flow', label: 'End Flow', description: 'Marks the end of a flow path.', icon: FlagOff, color: 'red' },
     ],
   },
   {

@@ -20,7 +20,7 @@ import type { Node } from 'reactflow';
 import { Separator } from '../ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Switch } from '../ui/switch';
-import { X, UploadCloud, Crop, File as FileIcon, Loader2 } from 'lucide-react';
+import { X, UploadCloud, Crop, File as FileIcon, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import Image from 'next/image';
 import Cropper, { Area } from 'react-easy-crop';
@@ -106,37 +106,76 @@ const MessageSettings = ({ node, onDataChange }: { node: Node, onDataChange: (da
 // Helper component for Question node settings
 const QuestionSettings = ({ node, onDataChange }: { node: Node, onDataChange: (data: any) => void }) => {
     const [question, setQuestion] = useState(node.data.question || '');
+    const [answerOptions, setAnswerOptions] = useState(node.data.answerOptions || []);
     const [saveAttribute, setSaveAttribute] = useState(node.data.saveAttribute || '');
 
     useEffect(() => {
-        onDataChange({ ...node.data, question, saveAttribute });
+        onDataChange({ ...node.data, question, answerOptions, saveAttribute });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [question, saveAttribute]);
+    }, [question, answerOptions, saveAttribute]);
+
+    const addAnswerOption = () => {
+        setAnswerOptions([...answerOptions, { id: crypto.randomUUID(), text: '' }]);
+    };
+
+    const handleOptionChange = (id: string, text: string) => {
+        setAnswerOptions(
+            answerOptions.map((opt: {id: string, text: string}) => (opt.id === id ? { ...opt, text } : opt))
+        );
+    };
+
+    const removeAnswerOption = (id: string) => {
+        setAnswerOptions(answerOptions.filter((opt: {id: string, text: string}) => opt.id !== id));
+    };
 
     return (
         <>
             <DialogHeader>
                 <DialogTitle>Ask a question</DialogTitle>
+                <DialogDescription>
+                    Ask a question with multiple choice answers.
+                </DialogDescription>
                 <Separator className='my-4' />
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="space-y-6 py-4 max-h-[60vh] overflow-y-auto pr-4">
                 <div className="space-y-2">
                     <Label htmlFor="question-text">Question Text</Label>
                     <Textarea 
                         id="question-text"
                         value={question}
                         onChange={(e) => setQuestion(e.target.value)}
-                        placeholder="e.g., What is your name?"
-                        rows={4}
+                        placeholder="e.g., What is your primary goal?"
+                        rows={3}
                     />
                 </div>
+
+                <div className="space-y-4">
+                    <Label>Answer Options</Label>
+                    {answerOptions.map((option: { id: string, text: string }, index: number) => (
+                        <div key={option.id} className="flex items-center gap-2">
+                            <Input 
+                                value={option.text}
+                                onChange={(e) => handleOptionChange(option.id, e.target.value)}
+                                placeholder={`Option ${index + 1}`}
+                            />
+                            <Button variant="ghost" size="icon" onClick={() => removeAnswerOption(option.id)}>
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                        </div>
+                    ))}
+                    <Button variant="outline" onClick={addAnswerOption} className="w-full">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Answer Option
+                    </Button>
+                </div>
+
                  <div className="space-y-2">
                     <Label htmlFor="save-attribute">Save Answer to Custom Attribute</Label>
                     <Input 
                         id="save-attribute"
                         value={saveAttribute}
                         onChange={(e) => setSaveAttribute(e.target.value)}
-                        placeholder="e.g., user_name"
+                        placeholder="e.g., user_goal"
                     />
                 </div>
             </div>
@@ -1004,7 +1043,7 @@ export function NodeSettingsModal() {
   }
 
   let dialogContentClassName = "sm:max-w-lg";
-  if (currentNode.data.type === 'message' && (currentNode.data.messageType === 'image') && isCropping) {
+  if ((currentNode.data.type === 'message' && (currentNode.data.messageType === 'image') && isCropping) || currentNode.data.type === 'question') {
     dialogContentClassName = "sm:max-w-2xl";
   }
 

@@ -190,7 +190,7 @@ const CustomNode: React.FC<NodeProps> = ({ id, data, selected }) => {
             <Handle type="source" position={Position.Right} id="source-true" className="!w-3 !h-3 !bg-green-600" style={{ top: '33%' }} />
             <Handle type="source" position={Position.Right} id="source-false" className="!w-3 !h-3 !bg-red-600" style={{ top: '66%' }} />
         </>
-      ) : (
+      ) : data.type !== 'end_flow' && (
           <Handle type="source" position={Position.Right} className="!w-3 !h-3 !bg-green-600" />
       )}
     </div>

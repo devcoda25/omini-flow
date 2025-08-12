@@ -123,17 +123,39 @@ const useFlowStore = create<RFState>((set, get) => ({
 
   onConnect: async (connection: Connection) => {
     if (!get().flowId) return;
+
+    const { nodes, edges } = get();
+    const sourceNode = nodes.find(node => node.id === connection.source);
+    
+    // If it's not a condition node, check if there's already an edge from this source handle.
+    if (sourceNode?.data.type !== 'condition') {
+        const existingEdge = edges.find(edge => edge.source === connection.source && edge.sourceHandle === connection.sourceHandle);
+        if (existingEdge) {
+            console.warn(`Node ${connection.source} can only have one outgoing connection.`);
+            return; // Prevent adding a new edge
+        }
+    } else { // For condition nodes, allow one connection per handle ('true' or 'false')
+         const existingEdge = edges.find(edge => edge.source === connection.source && edge.sourceHandle === connection.sourceHandle);
+         if (existingEdge) {
+            console.warn(`Handle ${connection.sourceHandle} on node ${connection.source} already has a connection.`);
+            return;
+         }
+    }
+
+
     const newEdge = { 
         ...connection, 
         id: `${+new Date()}`, 
         animated: true,
         label: connection.sourceHandle === 'source-true' ? 'TRUE' : connection.sourceHandle === 'source-false' ? 'FALSE' : undefined
     };
+
     set(
       produce((state: RFState) => {
         state.edges = addEdge(newEdge, get().edges);
       })
     );
+
     await supabase.from('edges').insert([
       {
         id: newEdge.id,
